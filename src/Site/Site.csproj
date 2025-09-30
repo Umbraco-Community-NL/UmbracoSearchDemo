@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms" Version="16.0.0" />
-    <PackageReference Include="Umbraco.Cms.Search.Core" Version="1.0.0-alpha.1" />
-    <PackageReference Include="Umbraco.Cms.Search.Provider.Examine" Version="1.0.0-alpha.1" />
+    <PackageReference Include="Umbraco.Cms.Search.Core" Version="1.0.0-alpha.4" />
+    <PackageReference Include="Umbraco.Cms.Search.Provider.Examine" Version="1.0.0-alpha.4" />
   </ItemGroup>
 
   <ItemGroup>
