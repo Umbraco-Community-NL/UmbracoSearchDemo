@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Site.Models;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DeliveryApi;
@@ -13,18 +13,18 @@ using SearchConstants = Umbraco.Cms.Search.Core.Constants;
 namespace Site.Controllers;
 
 [ApiController]
-public class BooksApiController : ControllerBase
+public class ArticlesApiController : ControllerBase
 {
     private readonly ISearcherResolver _searcherResolver;
     private readonly IApiContentBuilder _apiContentBuilder;
     private readonly ICacheManager _cacheManager;
-    private readonly ILogger<BooksApiController> _logger;
+    private readonly ILogger<ArticlesApiController> _logger;
 
-    public BooksApiController(
+    public ArticlesApiController(
         ISearcherResolver searcherResolver,
         IApiContentBuilder apiContentBuilder,
         ICacheManager cacheManager,
-        ILogger<BooksApiController> logger)
+        ILogger<ArticlesApiController> logger)
     {
         _searcherResolver = searcherResolver;
         _apiContentBuilder = apiContentBuilder;
@@ -32,14 +32,13 @@ public class BooksApiController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("/api/books")]
-    public async Task<IActionResult> GetBooks([FromQuery] BooksSearchRequest request)
+    [HttpGet("/api/articles")]
+    public async Task<IActionResult> GetArticles([FromQuery] ArticlesSearchRequest request)
     {
         // get the default searcher registered for published content
         var searcher = _searcherResolver.GetRequiredSearcher(SearchConstants.IndexAliases.PublishedContent);
 
         // get the filters, facets and sorters
-        // - filters and sorters are influenced by the active request, facets are fixed
         var filters = GetFilters(request);
         var facets = GetFacets();
         var sorters = GetSorters(request);
@@ -75,7 +74,7 @@ public class BooksApiController : ControllerBase
             .ToArray(); 
         
         return Ok(
-            new BookSearchResult
+            new ArticleSearchResult
             {
                 Total = result.Total,
                 Facets = result.Facets.ToArray(),
@@ -84,58 +83,68 @@ public class BooksApiController : ControllerBase
         );
     }
 
-    private static IEnumerable<Filter> GetFilters(BooksSearchRequest request)
+    private static IEnumerable<Filter> GetFilters(ArticlesSearchRequest request)
     {
-        
-        
-        // only include the "book" document type in the results (the document type ID is hardcoded here for simplicity)
+        // only include the "article" document type in the results
         yield return new KeywordFilter("contentTypeAlias", ["article"], false); 
-        /*
-        var publishYearFilters = (request.PublishYear ?? []).Select(ParseIntegerRangeFilter).WhereNotNull().ToArray();
-        if (publishYearFilters.Length is not 0)
-        {
-            yield return new IntegerRangeFilter("publishYear", publishYearFilters, false); 
-        }
-        */
+        
         if (request.Author?.Length > 0)
         {
             yield return new KeywordFilter("authorName", request.Author, false);
         }
+        
+        if (request.Categories?.Length > 0)
+        {
+            yield return new KeywordFilter("categoryName", request.Categories, false);
+        }
+        
+        if (request.ArticleYear?.Length > 0)
+        {
+            var parsedYears = request.ArticleYear
+                .Select(year => int.TryParse(year, out var result) ? (int?)result : null)
+                .Where(year => year.HasValue)
+                .Select(year => year!.Value)
+                .Distinct()
+                .OrderBy(year => year)
+                .ToArray();
+                
+            if (parsedYears.Length > 0)
+            {
+                var minYear = parsedYears.Min();
+                var maxYear = parsedYears.Max();
+                
+                
+                yield return new IntegerRangeFilter("articleYear", new []
+                {
+                    new IntegerRangeFilterRange(minYear, maxYear)
+                }, false);
 
+            }
+        }
     }
     
     private static Facet[] GetFacets()
     {
         var facets = new Facet[]
         {
-            new KeywordFacet("authorName")
+            new KeywordFacet("authorName"),
+            new KeywordFacet("categoryName"),
+            new IntegerExactFacet("articleYear")
         };
         return facets;
     }
     
-    private static IEnumerable<Sorter> GetSorters(BooksSearchRequest request)
+    private static IEnumerable<Sorter> GetSorters(ArticlesSearchRequest request)
     {
         var direction = request.SortDirection == "asc" ? Direction.Ascending : Direction.Descending;
         Sorter sorter = request.SortBy switch
         {
             "title" => new TextSorter(SearchConstants.FieldNames.Name, direction),
-            //"publishYear" => new IntegerSorter("publishYear", direction),
+            "date" => new TextSorter("articleYear", direction),
             _ => new ScoreSorter(direction)
         };
 
         return [sorter];
     }
-
-    private static IntegerRangeFilterRange? ParseIntegerRangeFilter(string? filter)
-    {
-        var values = filter?
-            .Split(',')
-            .Select(value => int.TryParse(value, out var result)
-                ? result
-                : (int?)null).ToArray();
-
-        return values?.Length is 2
-            ? new IntegerRangeFilterRange(values[0], values[1])
-            : null;
-    }
 }
+

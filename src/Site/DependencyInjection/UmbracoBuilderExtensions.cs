@@ -22,6 +22,19 @@ public static class UmbracoBuilderExtensions
                     PropertyName = "authorName",
                     FieldValues = FieldValues.Keywords,
                     Facetable = true
+                },
+                new ()
+                {
+                    PropertyName = "categoryName",
+                    FieldValues = FieldValues.Keywords,
+                    Facetable = true
+                },
+                new FieldOptions.Field()
+                {
+                    PropertyName = "articleYear",
+                    FieldValues = FieldValues.Integers,
+                    Facetable = true,
+                    Sortable = true
                 }
             ]
         );

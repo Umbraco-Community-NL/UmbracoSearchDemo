@@ -1,9 +1,9 @@
-﻿using Umbraco.Cms.Core.Models.DeliveryApi;
+using Umbraco.Cms.Core.Models.DeliveryApi;
 using Umbraco.Cms.Search.Core.Models.Searching.Faceting;
 
 namespace Site.Models;
 
-public class BookSearchResult
+public class ArticleSearchResult
 {
     public required long Total { get; init; }
     
@@ -11,3 +11,4 @@ public class BookSearchResult
 
     public required IApiContent[] Documents { get; init; }
 }
+
