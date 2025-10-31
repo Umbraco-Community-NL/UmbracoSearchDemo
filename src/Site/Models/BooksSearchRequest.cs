@@ -6,7 +6,7 @@ public class BooksSearchRequest
 
     public string[]? Length { get; init; }
 
-    public string[]? AuthorNationality { get; init; }
+    public string[]? Author { get; init; }
 
     public string[]? PublishYear { get; init; }
 
