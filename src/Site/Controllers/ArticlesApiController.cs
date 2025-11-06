@@ -13,30 +13,18 @@ using SearchConstants = Umbraco.Cms.Search.Core.Constants;
 namespace Site.Controllers;
 
 [ApiController]
-public class ArticlesApiController : ControllerBase
+public class ArticlesApiController(
+    ISearcherResolver searcherResolver,
+    IApiContentBuilder apiContentBuilder,
+    ICacheManager cacheManager,
+    ILogger<ArticlesApiController> logger)
+    : ControllerBase
 {
-    private readonly ISearcherResolver _searcherResolver;
-    private readonly IApiContentBuilder _apiContentBuilder;
-    private readonly ICacheManager _cacheManager;
-    private readonly ILogger<ArticlesApiController> _logger;
-
-    public ArticlesApiController(
-        ISearcherResolver searcherResolver,
-        IApiContentBuilder apiContentBuilder,
-        ICacheManager cacheManager,
-        ILogger<ArticlesApiController> logger)
-    {
-        _searcherResolver = searcherResolver;
-        _apiContentBuilder = apiContentBuilder;
-        _cacheManager = cacheManager;
-        _logger = logger;
-    }
-
     [HttpGet("/api/articles")]
     public async Task<IActionResult> GetArticles([FromQuery] ArticlesSearchRequest request)
     {
         // get the default searcher registered for published content
-        var searcher = _searcherResolver.GetRequiredSearcher(SearchConstants.IndexAliases.PublishedContent);
+        var searcher = searcherResolver.GetRequiredSearcher(SearchConstants.IndexAliases.PublishedContent);
 
         // get the filters, facets and sorters
         var filters = GetFilters(request);
@@ -61,13 +49,13 @@ public class ArticlesApiController : ControllerBase
         var documents = result.Documents
             .Select(document =>
             {
-                var publishedContent = _cacheManager.Content.GetById(document.Id);
+                var publishedContent = cacheManager.Content.GetById(document.Id);
                 if (publishedContent is not null)
                 {
-                    return _apiContentBuilder.Build(publishedContent);
+                    return apiContentBuilder.Build(publishedContent);
                 }
 
-                _logger.LogWarning("Could not find published content for document with id: {documentId}", document.Id);
+                logger.LogWarning("Could not find published content for document with id: {documentId}", document.Id);
                 return null;
             })
             .WhereNotNull()
