@@ -4,7 +4,7 @@ using Umbraco.Cms.Search.Core.Models.Indexing;
 using Umbraco.Cms.Search.Core.PropertyValueHandlers;
 using IndexValue = Umbraco.Cms.Search.Core.Models.Indexing.IndexValue;
 
-namespace Site.NewFolder
+namespace Site.ValueHandlers
 {
     public sealed class ArticleDatePropertyValueHandler : IPropertyValueHandler
     {
