@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Search.Documents" Version="11.6.0" />
+		<PackageReference Include="Umbraco.Cms" Version="16.0.0" />
+		<PackageReference Include="Umbraco.Cms.Search.Core" Version="1.0.0-alpha.4" />
+		<PackageReference Include="Umbraco.Cms.Search.Provider.Examine" Version="1.0.0-alpha.4" />
+	</ItemGroup>
+
+
+</Project>

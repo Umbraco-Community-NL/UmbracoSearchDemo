@@ -74,16 +74,16 @@ public class ArticlesApiController(
     private static IEnumerable<Filter> GetFilters(ArticlesSearchRequest request)
     {
         // only include the "article" document type in the results
-        yield return new KeywordFilter("contentTypeAlias", ["article"], false); 
+        //yield return new KeywordFilter("contentTypeAlias", ["article"], false); 
         
         if (request.Author?.Length > 0)
         {
-            yield return new KeywordFilter("authorName", request.Author, false);
+            yield return new KeywordFilter("author", request.Author, false);
         }
         
         if (request.Categories?.Length > 0)
         {
-            yield return new KeywordFilter("categoryName", request.Categories, false);
+            yield return new KeywordFilter("category", request.Categories, false);
         }
         
         if (request.ArticleYear?.Length > 0)
@@ -115,9 +115,9 @@ public class ArticlesApiController(
     {
         var facets = new Facet[]
         {
-            new KeywordFacet("authorName"),
-            new KeywordFacet("categoryName"),
-            new IntegerExactFacet("articleYear")
+            //new KeywordFacet("author"),
+            //new KeywordFacet("categoryName"),
+            //new IntegerExactFacet("articleYear")
         };
         return facets;
     }

@@ -1,22 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11201.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Site", "Site\Site.csproj", "{BD315A9A-BF1B-422A-9C17-B805E69437D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco.AzureSearch", "Umbraco.AzureSearch\Umbraco.AzureSearch.csproj", "{8625D1A9-0B9C-7419-BA48-56589B208E3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BD315A9A-BF1B-422A-9C17-B805E69437D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD315A9A-BF1B-422A-9C17-B805E69437D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD315A9A-BF1B-422A-9C17-B805E69437D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD315A9A-BF1B-422A-9C17-B805E69437D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8625D1A9-0B9C-7419-BA48-56589B208E3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8625D1A9-0B9C-7419-BA48-56589B208E3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8625D1A9-0B9C-7419-BA48-56589B208E3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8625D1A9-0B9C-7419-BA48-56589B208E3A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
