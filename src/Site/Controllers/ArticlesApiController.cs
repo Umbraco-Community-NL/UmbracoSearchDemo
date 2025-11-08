@@ -3,6 +3,7 @@ using Site.Models;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DeliveryApi;
 using Umbraco.Cms.Core.PublishedCache;
+using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Search.Core.Extensions;
 using Umbraco.Cms.Search.Core.Models.Searching.Faceting;
 using Umbraco.Cms.Search.Core.Models.Searching.Filtering;
@@ -17,12 +18,14 @@ public class ArticlesApiController(
     ISearcherResolver searcherResolver,
     IApiContentBuilder apiContentBuilder,
     ICacheManager cacheManager,
+    IContentTypeService contentTypeService,
     ILogger<ArticlesApiController> logger)
     : ControllerBase
 {
     [HttpGet("/api/articles")]
     public async Task<IActionResult> GetArticles([FromQuery] ArticlesSearchRequest request)
     {
+        
         // get the default searcher registered for published content
         var searcher = searcherResolver.GetRequiredSearcher(SearchConstants.IndexAliases.PublishedContent);
 
@@ -46,12 +49,13 @@ public class ArticlesApiController(
         );
 
         // build response models for the search results (the Delivery API output format)
-        var documents = result.Documents
+         var documents = result.Documents
             .Select(document =>
             {
                 var publishedContent = cacheManager.Content.GetById(document.Id);
                 if (publishedContent is not null)
                 {
+                    ///return publishedContent.Name;
                     return apiContentBuilder.Build(publishedContent);
                 }
 
@@ -71,19 +75,20 @@ public class ArticlesApiController(
         );
     }
 
-    private static IEnumerable<Filter> GetFilters(ArticlesSearchRequest request)
+    private IEnumerable<Filter> GetFilters(ArticlesSearchRequest request)
     {
+        var articleContentType = contentTypeService.Get("article");
         // only include the "article" document type in the results
-        //yield return new KeywordFilter("contentTypeAlias", ["article"], false); 
-        
+        yield return new KeywordFilter(SearchConstants.FieldNames.ContentTypeId, [articleContentType.Key.ToString()], false);
+
         if (request.Author?.Length > 0)
         {
-            yield return new KeywordFilter("author", request.Author, false);
+            yield return new KeywordFilter("authorName", request.Author, false);
         }
         
         if (request.Categories?.Length > 0)
         {
-            yield return new KeywordFilter("category", request.Categories, false);
+            yield return new KeywordFilter("categoryName", request.Categories, false);
         }
         
         if (request.ArticleYear?.Length > 0)
@@ -115,8 +120,8 @@ public class ArticlesApiController(
     {
         var facets = new Facet[]
         {
-            //new KeywordFacet("author"),
-            //new KeywordFacet("categoryName"),
+            new KeywordFacet("authorName"),
+            new KeywordFacet("categoryName"),
             //new IntegerExactFacet("articleYear")
         };
         return facets;

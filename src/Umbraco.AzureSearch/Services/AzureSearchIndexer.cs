@@ -130,46 +130,48 @@ internal sealed class AzureSearchIndexer(
             
             foreach (IndexField field in variationFields.Where(f => knownFields.Contains(f.FieldName)))
             {
+                var parsedValue = knownFieldsProvider.GetParsedValue(field.FieldName, field.Value);
+
                 if (field.Value.Texts?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Texts)] = string.Join(" ", field.Value.Texts);
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Texts)] = string.Join(" ", parsedValue.Texts);
                 }
                 
                 if (field.Value.TextsR1?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR1)] = string.Join(" ", field.Value.TextsR1);
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR1)] = string.Join(" ", parsedValue.TextsR1);
                 }
                 
                 if (field.Value.TextsR2?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR2)] = string.Join(" ", field.Value.TextsR2);
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR2)] = string.Join(" ", parsedValue.TextsR2);
                 }
                 
                 if (field.Value.TextsR3?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR3)] = string.Join(" ", field.Value.TextsR3);
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.TextsR3)] = string.Join(" ", parsedValue.TextsR3);
                 }
                 
                 if (field.Value.Integers?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Integers)] = field.Value.Integers.ToArray();
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Integers)] = parsedValue.Integers.ToArray();
                     // Add sortable single value
-                    document[FieldName(field.FieldName, $"{IndexConstants.FieldTypePostfix.Integers}{IndexConstants.FieldTypePostfix.Sortable}")] = field.Value.Integers.First();
+                    document[FieldName(field.FieldName, $"{IndexConstants.FieldTypePostfix.Integers}{IndexConstants.FieldTypePostfix.Sortable}")] = parsedValue.Integers.First();
                 }
                 
                 if (field.Value.Decimals?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Decimals)] = field.Value.Decimals.ToArray();
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Decimals)] = parsedValue.Decimals.ToArray();
                 }
                 
                 if (field.Value.DateTimeOffsets?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.DateTimeOffsets)] = field.Value.DateTimeOffsets.ToArray();
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.DateTimeOffsets)] = parsedValue.DateTimeOffsets.ToArray();
                 }
                 
                 if (field.Value.Keywords?.Any() is true)
                 {
-                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Keywords)] = field.Value.Keywords.ToArray();
+                    document[FieldName(field.FieldName, IndexConstants.FieldTypePostfix.Keywords)] = parsedValue.Keywords.ToArray();
                 }
             }
             
