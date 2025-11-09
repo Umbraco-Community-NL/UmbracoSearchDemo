@@ -32,22 +32,25 @@ createApp({
         categoryFacet() {
             return this.facets.find(f => f.fieldName === 'categoryName');
         },
+        // Prefer daterange facet 'articleDate', fall back to integer facet 'articleYear'
         yearFacet() {
-            return this.facets.find(f => f.fieldName === 'articleYear');
+            return this.facets.find(f => f.fieldName === 'articleDate')
+                || this.facets.find(f => f.fieldName === 'articleYear');
         },
         availableYears() {
             if (!this.yearFacet || !this.yearFacet.values) {
                 return [];
             }
-            // Handle both IntegerExactFacetValue (has 'value') and KeywordFacetValue (has 'key')
+            // Handle multiple facet value shapes:
+            // - DateRangeFacetValue: { key: "2023", min: "iso", max: "iso", count: number }
+            // - KeywordFacetValue: { key: "2023", count: number }
+            // - IntegerExactFacetValue: { value: 2023, count: number }
             return this.yearFacet.values
                 .map(v => {
-                    // IntegerExactFacetValue has 'value' property
-                    if (v.value !== undefined) {
+                    if (v.value !== undefined) { // IntegerExactFacetValue
                         return parseInt(v.value);
                     }
-                    // KeywordFacetValue has 'key' property
-                    if (v.key !== undefined) {
+                    if (v.key !== undefined) { // Keyword or DateRange facet provides year in key
                         return parseInt(v.key);
                     }
                     return NaN;
@@ -97,6 +100,45 @@ createApp({
         this.fetchArticles();
     },
     methods: {
+        // Helper: find min/max ISO bounds for a given year from the daterange facet
+        getYearBounds(year) {
+            if (!this.yearFacet || this.yearFacet.fieldName !== 'articleDate') {
+                return null;
+            }
+            const entry = (this.yearFacet.values || []).find(v => `${v.key}` === `${year}`);
+            if (entry && entry.min && entry.max) {
+                return { min: entry.min, max: entry.max };
+            }
+            return null;
+        },
+        // Helper: determine if the current year selection is filtered
+        isYearRangeFiltered() {
+            if (!this.selectedMinYear || !this.selectedMaxYear) return false;
+            const range = this.yearRange;
+            return this.selectedMinYear > range.min || this.selectedMaxYear < range.max;
+        },
+        // Build a daterange param "minISO,maxISO" from selected years and facet bounds
+        buildArticleDateRangeParam() {
+            if (!this.yearFacet || this.yearFacet.fieldName !== 'articleDate') return null;
+            if (!this.isYearRangeFiltered()) return null;
+
+            const minSel = this.selectedMinYear;
+            const maxSel = this.selectedMaxYear;
+
+            // Try to use facet-provided ISO bounds per year
+            const minBounds = this.getYearBounds(minSel);
+            const maxBounds = this.getYearBounds(maxSel);
+
+            // Fallbacks in case facet entries are missing for edge years
+            const fallbackMin = `${minSel}-01-01T00:00:00Z`;
+            // End-of-year; depending on server logic min/max precision may not matter
+            const fallbackMax = `${maxSel}-12-31T23:59:59Z`;
+
+            const minIso = (minBounds && minBounds.min) ? minBounds.min : fallbackMin;
+            const maxIso = (maxBounds && maxBounds.max) ? maxBounds.max : fallbackMax;
+
+            return `${minIso},${maxIso}`;
+        },
         async fetchArticles() {
             this.loading = true;
             this.error = null;
@@ -124,15 +166,22 @@ createApp({
                     });
                 }
                 
-                // Send year filter if range is filtered
-                const yearYears = this.selectedYears;
-                if (yearYears && yearYears.length > 0) {
-                    console.log('Sending year filter:', yearYears);
-                    yearYears.forEach(year => {
-                        params.append('articleYear', year);
-                    });
+                // Year/date filtering
+                // If we have a daterange facet ('articleDate'), send a single param "minISO,maxISO"
+                const dateRangeParam = this.buildArticleDateRangeParam();
+                if (dateRangeParam) {
+                    params.append('articleDate', dateRangeParam);
                 } else {
-                    console.log('No year filter - selectedMinYear:', this.selectedMinYear, 'selectedMaxYear:', this.selectedMaxYear, 'yearRange:', this.yearRange);
+                    // Backward compatibility: if we only have an integer/keyword year facet ('articleYear'),
+                    // append each year in the filtered range as separate 'articleYear' params
+                    if (this.yearFacet && this.yearFacet.fieldName === 'articleYear') {
+                        const yearYears = this.selectedYears;
+                        if (yearYears && yearYears.length > 0) {
+                            yearYears.forEach(year => {
+                                params.append('articleYear', year);
+                            });
+                        }
+                    }
                 }
                 
                 if (this.sortBy) {

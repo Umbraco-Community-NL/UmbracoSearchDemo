@@ -31,6 +31,13 @@ public static class UmbracoBuilderExtensions
                 },
                 new FieldOptions.Field()
                 {
+                    PropertyName = "articleDate",
+                    FieldValues = FieldValues.DateTimeOffsets,
+                    Facetable = true,
+                    Sortable = true
+                },
+                new FieldOptions.Field()
+                {
                     PropertyName = "articleYear",
                     FieldValues = FieldValues.Integers,
                     Facetable = true,
