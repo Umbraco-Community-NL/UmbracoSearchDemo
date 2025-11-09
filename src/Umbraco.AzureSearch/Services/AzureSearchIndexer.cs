@@ -130,7 +130,7 @@ internal sealed class AzureSearchIndexer(
             
             foreach (IndexField field in variationFields.Where(f => knownFields.Contains(f.FieldName)))
             {
-                var parsedValue = knownFieldsProvider.GetParsedValue(field.FieldName, field.Value);
+                var parsedValue = field.Value;
 
                 if (field.Value.Texts?.Any() is true)
                 {

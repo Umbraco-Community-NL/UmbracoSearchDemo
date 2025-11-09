@@ -1,11 +1,9 @@
 ﻿using Site.SearchProvider;
-using Site.SearchProvider.Configuration;
 using Umbraco.AzureSearch.Abstractions;
 using Umbraco.AzureSearch.Configuration;
 using Umbraco.AzureSearch.DependencyInjection;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Search.Core.DependencyInjection;
-using Umbraco.Cms.Search.Provider.Examine.Configuration;
 using SearcherOptions = Site.SearchProvider.Configuration.SearcherOptions;
 
 namespace Site.DependencyInjection;

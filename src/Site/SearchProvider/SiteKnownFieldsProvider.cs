@@ -1,9 +1,6 @@
-// file: Site/SearchProvider/Services/SiteKnownFieldsProvider.cs
-
 using Microsoft.Extensions.Options;
 using Umbraco.AzureSearch.Abstractions;
 using Umbraco.AzureSearch.Configuration;
-using Umbraco.Cms.Search.Core.Models.Indexing;
 
 namespace Site.SearchProvider;
 
@@ -34,25 +31,5 @@ public sealed class SiteKnownFieldsProvider(IOptionsMonitor<KnownFieldsOptions> 
         }
 
         return set.ToArray();
-    }
-
-    public IndexValue GetParsedValue(string fieldFieldName, IndexValue fieldValue)
-    {
-        if (fieldFieldName.Contains("cat", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return new IndexValue()
-            {
-                Keywords = fieldValue.Keywords,
-                Integers = fieldValue.Integers,
-                DateTimeOffsets = fieldValue.DateTimeOffsets,
-                Decimals = fieldValue.Decimals,
-                Texts = fieldValue.Texts,
-                TextsR1 = fieldValue.TextsR1,
-                TextsR2 = fieldValue.TextsR2,
-                TextsR3 = fieldValue.TextsR3,
-            };
-        }
-        return fieldValue;
-
     }
 }

@@ -11,4 +11,3 @@ public class ArticleSearchResult
 
     public required IApiContent[] Documents { get; init; }
 }
-

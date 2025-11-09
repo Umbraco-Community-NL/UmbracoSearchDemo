@@ -145,7 +145,7 @@ internal sealed class AzureSearchSearcher : AzureSearchServiceBase, IAzureSearch
             SearchResults<SearchDocument> response = await searchClient.SearchAsync<SearchDocument>(searchText, searchOptions);
             
             // Extract documents
-            var documents = new List<Document>();
+                var documents = new List<Document>();
             await foreach (var result in response.GetResultsAsync())
             {
                 if (result.Document.TryGetValue(IndexConstants.FieldNames.Key, out object? keyValue) &&
@@ -295,10 +295,10 @@ internal sealed class AzureSearchSearcher : AzureSearchServiceBase, IAzureSearch
     {
         var fieldName = FieldName(filter.FieldName, IndexConstants.FieldTypePostfix.Keywords);
         var values = string.Join(",", filter.Values.Select(v => v.Replace("'", "''")));
-        var condition = $"{fieldName}/any(x: search.in(x, '{values}'))";
+        var condition = $"{fieldName}/any(x: search.in(x, '{values}', ','))";
         return filter.Negate ? $"not ({condition})" : condition;
     }
-    
+
     private string BuildIntegerExactFilter(IntegerExactFilter filter)
     {
         var fieldName = FieldName(filter.FieldName, IndexConstants.FieldTypePostfix.Integers);

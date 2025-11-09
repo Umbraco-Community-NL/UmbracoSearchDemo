@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Site.Models;
 using Umbraco.Cms.Core;
@@ -55,7 +56,6 @@ public class ArticlesApiController(
                 var publishedContent = cacheManager.Content.GetById(document.Id);
                 if (publishedContent is not null)
                 {
-                    ///return publishedContent.Name;
                     return apiContentBuilder.Build(publishedContent);
                 }
 
@@ -79,7 +79,7 @@ public class ArticlesApiController(
     {
         var articleContentType = contentTypeService.Get("article");
         // only include the "article" document type in the results
-        yield return new KeywordFilter(SearchConstants.FieldNames.ContentTypeId, [articleContentType.Key.ToString()], false);
+        yield return new KeywordFilter(SearchConstants.FieldNames.ContentTypeId, [articleContentType?.Key.ToString() ?? string.Empty], false);
 
         if (request.Author?.Length > 0)
         {
@@ -90,28 +90,29 @@ public class ArticlesApiController(
         {
             yield return new KeywordFilter("categoryName", request.Categories, false);
         }
-        
-        if (request.ArticleYear?.Length > 0)
-        {
-            var parsedYears = request.ArticleYear
-                .Select(year => int.TryParse(year, out var result) ? (int?)result : null)
-                .Where(year => year.HasValue)
-                .Select(year => year!.Value)
-                .Distinct()
-                .OrderBy(year => year)
-                .ToArray();
-                
-            if (parsedYears.Length > 0)
-            {
-                var minYear = parsedYears.Min();
-                var maxYear = parsedYears.Max();
-                
-                
-                yield return new IntegerRangeFilter("articleYear", new []
-                {
-                    new IntegerRangeFilterRange(minYear, maxYear)
-                }, false);
 
+        // articleDate range from query string: ?articleDate=from,to (ISO 8601, comma-separated)
+        var articleDateRaw = Request.Query["articleDate"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(articleDateRaw))
+        {
+            var parts = articleDateRaw.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 2
+                && DateTimeOffset.TryParse(parts[0], CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var fromDto)
+                && DateTimeOffset.TryParse(parts[1], CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var toDto))
+            {
+                var from = fromDto.UtcDateTime;
+                var to = toDto.UtcDateTime;
+
+                if (from > to)
+                {
+                    // swap if provided in reverse
+                    (from, to) = (to, from);
+                }
+
+                yield return new DateTimeOffsetRangeFilter(
+                    "articleDate",
+                    [new DateTimeOffsetRangeFilterRange(from, to)],
+                    false);
             }
         }
     }
@@ -122,7 +123,12 @@ public class ArticlesApiController(
         {
             new KeywordFacet("authorName"),
             new KeywordFacet("categoryName"),
-            //new IntegerExactFacet("articleYear")
+            new DateTimeOffsetRangeFacet("articleDate", new []
+            {
+                new DateTimeOffsetRangeFacetRange("2023", new DateTime(2023,1,1), new DateTime(2023,12,31)),
+                new DateTimeOffsetRangeFacetRange("2024", new DateTime(2024,1,1), new DateTime(2024,12,31)),
+                new DateTimeOffsetRangeFacetRange("2025", new DateTime(2025,1,1), new DateTime(2025,12,31)),
+            })
         };
         return facets;
     }
@@ -133,11 +139,12 @@ public class ArticlesApiController(
         Sorter sorter = request.SortBy switch
         {
             "title" => new TextSorter(SearchConstants.FieldNames.Name, direction),
-            "date" => new TextSorter("articleYear", direction),
+            "date" => new IntegerSorter("articleYear", direction),
             _ => new ScoreSorter(direction)
         };
 
         return [sorter];
     }
+
 }
 

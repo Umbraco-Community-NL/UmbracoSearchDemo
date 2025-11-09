@@ -8,8 +8,6 @@ public class ArticlesSearchRequest
 
     public string[]? Categories { get; init; }
 
-    public string[]? ArticleYear { get; init; }
-
     public string? SortBy { get; init; }
 
     public string? SortDirection { get; init; }
