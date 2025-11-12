@@ -1,6 +1,6 @@
-﻿using Umbraco.Cms.Core.Composing;
+﻿using Kjac.SearchProvider.Elasticsearch.DependencyInjection;
+using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Search.Core.DependencyInjection;
-using Umbraco.Cms.Search.Provider.Examine.DependencyInjection;
 
 namespace Site.DependencyInjection;
 
@@ -12,13 +12,11 @@ public class SiteComposer : IComposer
             // add core services for search abstractions
             .AddSearchCore()
             // use the Examine search provider
-            .AddExamineSearchProvider()
+            .AddElasticsearchSearchProvider()
             // force rebuild indexes after startup
             .RebuildIndexesAfterStartup();
 
         builder
-            // configure the Examine search provider for this site
-            .ConfigureExamineSearchProvider()
             // configure System.Text.Json to allow serializing output models
             .ConfigureJsonOptions();
     }
