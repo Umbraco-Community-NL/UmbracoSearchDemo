@@ -17,13 +17,13 @@ public static class UmbracoBuilderExtensions
         // the Examine search provider requires explicit definitions of the fields used for faceting and/or sorting. 
         builder.Services.Configure<FieldOptions>(options => options.Fields =
             [
-                new ()
+                new FieldOptions.Field
                 {
                     PropertyName = "authorName",
                     FieldValues = FieldValues.Keywords,
                     Facetable = true
                 },
-                new ()
+                new FieldOptions.Field
                 {
                     PropertyName = "categoryName",
                     FieldValues = FieldValues.Keywords,
