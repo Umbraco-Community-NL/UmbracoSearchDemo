@@ -7,7 +7,7 @@ using Umbraco.Cms.Search.Core.Models.Indexing;
 using Umbraco.Cms.Search.Core.PropertyValueHandlers;
 using IndexValue = Umbraco.Cms.Search.Core.Models.Indexing.IndexValue;
 
-namespace Site.NewFolder
+namespace Site.ValueHandlers
 {
     /// <summary>
     /// Provides property value handling for article-related properties using Multi-Node Tree Picker editors, enabling
